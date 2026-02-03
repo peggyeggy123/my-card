@@ -1,3 +1,5 @@
+// Added React import to fix "Cannot find namespace 'React'" error when using React.ReactNode
+import React from 'react';
 
 export interface ServiceItem {
   id: string;
@@ -16,4 +18,5 @@ export interface ContactInfo {
   lineId: string;
   instagramId: string;
   email: string;
+  customAvatarUrl?: string; // 新增：自定義大頭貼網址
 }
