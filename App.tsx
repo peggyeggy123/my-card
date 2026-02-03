@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Phone, 
   MessageCircle, 
@@ -23,7 +23,9 @@ const INITIAL_CONTACT: ContactInfo = {
   phone: "886917979019", 
   lineId: "t-4cUJ2Op1", 
   instagramId: "ching_1777", 
-  email: "ching@example.com"
+  email: "ching@example.com",
+  // 👇 在這裡的引號中間貼上你從圖床獲得的「直接連結」網址 👇
+  customAvatarUrl: "https://i.postimg.cc/FRw3NtDc/profile.png" 
 };
 
 const SERVICES: ServiceItem[] = [
@@ -79,7 +81,6 @@ const ServiceCard: React.FC<{ item: ServiceItem }> = ({ item }) => (
 
 const App: React.FC = () => {
   const [contact] = useState<ContactInfo>(INITIAL_CONTACT);
-  // 加入一個隨機數，確保每次重新進入網頁都會強制抓取最新的圖片檔案
   const [cacheBuster] = useState(() => Date.now());
 
   const handleSaveContact = () => {
@@ -93,6 +94,8 @@ const App: React.FC = () => {
     link.click();
   };
 
+  const avatarSource = contact.customAvatarUrl || `./profile.jpg?t=${cacheBuster}`;
+
   return (
     <div className="min-h-screen bg-[#0a0f1d] flex justify-center items-start sm:py-8">
       <div className="w-full max-w-[420px] bg-[#0c1425] min-h-screen sm:min-h-[820px] sm:rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col relative border border-white/5">
@@ -103,11 +106,10 @@ const App: React.FC = () => {
           
           <div className="absolute inset-0 flex items-start justify-center z-10">
             <img 
-              src={`./profile.jpg?t=${cacheBuster}`} 
+              src={avatarSource}
               alt={contact.name} 
               className="h-full w-full object-cover object-top scale-100"
               onError={(e) => {
-                // 如果找不到檔案，改為生成女性理財顧問的占位圖
                 (e.target as HTMLImageElement).src = "https://api.a0.dev/assets/image?text=Professional%20Asian%20Female%20Financial%20Advisor%20Portrait&aspect=9:16";
               }}
             />
