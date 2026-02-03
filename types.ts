@@ -1,3 +1,4 @@
+
 // Added React import to fix "Cannot find namespace 'React'" error when using React.ReactNode
 import React from 'react';
 
@@ -7,6 +8,7 @@ export interface ServiceItem {
   description: string;
   icon: React.ReactNode;
   color: string;
+  isPopular?: boolean; // 新增：是否為熱門項目
 }
 
 export interface ContactInfo {

@@ -9,9 +9,10 @@ import {
   Users, 
   Scale, 
   Car, 
-  Save,
   ChevronRight,
-  Mail
+  Mail,
+  Calendar,
+  Flame
 } from 'lucide-react';
 import { ServiceItem, ContactInfo } from './types';
 
@@ -33,14 +34,16 @@ const SERVICES: ServiceItem[] = [
     title: '醫療保險',
     description: '保單檢視 / 理賠服務',
     icon: <Stethoscope size={18} />,
-    color: 'bg-blue-500/10 text-blue-400'
+    color: 'bg-blue-500/10 text-blue-400',
+    isPopular: true
   },
   {
     id: '2',
     title: '投資理財',
     description: '資產配置 / 現金流規劃',
     icon: <TrendingUp size={18} />,
-    color: 'bg-orange-500/10 text-orange-400'
+    color: 'bg-orange-500/10 text-orange-400',
+    isPopular: true
   },
   {
     id: '3',
@@ -71,7 +74,15 @@ const ServiceCard: React.FC<{ item: ServiceItem }> = ({ item }) => (
       {item.icon}
     </div>
     <div className="flex-1">
-      <h4 className="text-white font-bold text-[16px] tracking-wide">{item.title}</h4>
+      <div className="flex items-center gap-2">
+        <h4 className="text-white font-bold text-[16px] tracking-wide">{item.title}</h4>
+        {item.isPopular && (
+          <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-500/20 text-amber-500 text-[9px] font-black rounded border border-amber-500/30 tracking-widest uppercase">
+            <Flame size={10} fill="currentColor" />
+            Popular
+          </span>
+        )}
+      </div>
       <p className="text-gray-400 text-[13px] mt-0.5">{item.description}</p>
     </div>
     <ChevronRight size={16} className="text-gray-600 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
@@ -82,45 +93,6 @@ const App: React.FC = () => {
   const [contact] = useState<ContactInfo>(INITIAL_CONTACT);
   const [cacheBuster] = useState(() => Date.now());
 
-  const handleSaveContact = () => {
-    // 格式化電話號碼為國際格式（+886...）以利通訊錄辨識
-    const formattedPhone = contact.phone.startsWith('0') 
-      ? `+886${contact.phone.substring(1)}` 
-      : contact.phone;
-
-    // 建立標準 vCard 3.0 格式字串
-    const vcard = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      `FN;CHARSET=UTF-8:${contact.name}`,
-      `N;CHARSET=UTF-8:;${contact.name};;;`,
-      `ORG;CHARSET=UTF-8:${contact.company}`,
-      `TITLE;CHARSET=UTF-8:${contact.title}`,
-      `TEL;TYPE=CELL:${formattedPhone}`,
-      `EMAIL;TYPE=INTERNET,HOME:${contact.email}`,
-      `URL:https://line.me/ti/p/${contact.lineId}`,
-      `NOTE;CHARSET=UTF-8:專業理財規劃師 - ${contact.name}`,
-      'END:VCARD'
-    ].join('\r\n'); // 使用 \r\n 以確保跨平台相容性
-
-    // 建立 Blob 物件
-    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    
-    // 觸發下載
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${contact.name}_聯絡資訊.vcf`);
-    document.body.appendChild(link);
-    link.click();
-    
-    // 清理資源
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
-  };
-
   const avatarSource = contact.customAvatarUrl || `./profile.jpg?t=${cacheBuster}`;
 
   return (
@@ -128,25 +100,30 @@ const App: React.FC = () => {
       <div className="w-full max-w-[420px] bg-[#0c1425] min-h-screen sm:min-h-[820px] sm:rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col relative border border-white/5">
         
         {/* 頂部圖片區域 - 1:1 比例 */}
-        <div className="relative aspect-square overflow-hidden bg-[#0c1425]">
+        <div className="relative aspect-square w-full overflow-hidden bg-[#0c1425]">
           <div className="absolute inset-0 hex-pattern opacity-20"></div>
           
           <div className="absolute inset-0 flex items-start justify-center z-10">
             <img 
               src={avatarSource}
               alt={contact.name} 
-              className="h-full w-full object-cover object-top scale-100"
+              className="h-full w-full object-cover object-top"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "https://api.a0.dev/assets/image?text=Professional%20Asian%20Female%20Financial%20Advisor%20Portrait&aspect=1:1";
               }}
             />
+            {/* 漸層遮罩 */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0c1425] via-transparent to-transparent opacity-100"></div>
           </div>
 
-          <div className="absolute bottom-10 left-8 z-20 max-w-[280px]">
-             <div className="inline-block px-2.5 py-0.5 bg-amber-500/20 border border-amber-500/30 rounded mb-2 backdrop-blur-sm">
-                <span className="text-amber-400 text-[11px] font-black tracking-[0.2em] uppercase">Certified RFA</span>
+          {/* 右上角標籤 */}
+          <div className="absolute top-6 right-6 z-30">
+             <div className="px-3 py-1 bg-amber-500/80 backdrop-blur-md rounded-full shadow-lg border border-white/20">
+                <span className="text-[#0c1425] text-[10px] font-black tracking-widest uppercase">Certified RFA</span>
              </div>
+          </div>
+
+          <div className="absolute bottom-10 left-8 z-20 max-w-[280px]">
              <h1 className="text-5xl font-black text-white tracking-tighter mb-1 drop-shadow-2xl">
                {contact.name}
              </h1>
@@ -194,7 +171,7 @@ const App: React.FC = () => {
           </div>
 
           {/* 專業服務列表 */}
-          <div className="space-y-4 pb-56">
+          <div className="space-y-4 pb-40">
             <div className="flex items-center justify-between mb-4">
                <h3 className="text-white font-black text-[13px] tracking-[0.2em] uppercase opacity-80">專業服務領域</h3>
                <div className="h-[1px] flex-1 bg-white/10 ml-4"></div>
@@ -206,33 +183,24 @@ const App: React.FC = () => {
         </div>
 
         {/* 底部行動區域 */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#0c1425] via-[#0c1425] to-transparent backdrop-blur-xl z-50">
+        <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-[#0c1425] via-[#0c1425] to-transparent backdrop-blur-xl z-50">
           <div className="flex flex-col gap-3">
-            {/* 主按鈕：與我聊聊 */}
+            {/* 主按鈕：預約聊聊 */}
             <a 
               href={`https://line.me/ti/p/${contact.lineId}`}
               target="_blank"
-              className="w-full bg-[#06c755] hover:bg-[#05b34c] text-white py-4.5 rounded-2xl font-black text-[17px] shadow-[0_15px_35px_rgba(6,199,85,0.25)] flex items-center justify-center gap-3 active:scale-[0.98] transition-all relative overflow-hidden group"
+              className="w-full bg-[#06c755] hover:bg-[#05b34c] text-white py-3.5 rounded-xl font-bold text-[16px] shadow-[0_10px_25px_rgba(6,199,85,0.2)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all relative overflow-hidden group"
             >
               <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-[-20deg] group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
-              <MessageCircle size={22} fill="white" />
-              立即與我聊聊
+              <Calendar size={18} />
+              預約聊聊
             </a>
-
-            {/* 次要按鈕：加入通訊錄 - 觸發 vCard 下載 */}
-            <button 
-              onClick={handleSaveContact}
-              className="w-full bg-white/[0.05] border border-white/10 text-amber-500 py-3.5 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all opacity-80 hover:opacity-100"
-            >
-              <Save size={16} strokeWidth={2.5} />
-              加入通訊錄
-            </button>
           </div>
           
-          <div className="mt-5 flex flex-col items-center opacity-40">
+          <div className="mt-4 flex flex-col items-center opacity-40">
              <div className="flex items-center gap-3">
-                <Mail size={14} className="text-white" />
-                <span className="text-[11px] text-white font-bold tracking-widest uppercase">
+                <Mail size={12} className="text-white" />
+                <span className="text-[10px] text-white font-bold tracking-widest uppercase">
                   Sanshang Meibang Life
                 </span>
              </div>
