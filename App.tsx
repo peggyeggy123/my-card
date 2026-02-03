@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Phone, 
   MessageCircle, 
@@ -79,6 +79,8 @@ const ServiceCard: React.FC<{ item: ServiceItem }> = ({ item }) => (
 
 const App: React.FC = () => {
   const [contact] = useState<ContactInfo>(INITIAL_CONTACT);
+  // 加入一個隨機數，確保每次重新進入網頁都會強制抓取最新的圖片檔案
+  const [cacheBuster] = useState(() => Date.now());
 
   const handleSaveContact = () => {
     const formattedPhone = contact.phone.startsWith('886') ? `+${contact.phone}` : contact.phone;
@@ -100,14 +102,13 @@ const App: React.FC = () => {
           <div className="absolute inset-0 hex-pattern opacity-20"></div>
           
           <div className="absolute inset-0 flex items-start justify-center z-10">
-            {/* 修改點：這裡現在讀取本地的 profile.jpg */}
             <img 
-              src="./profile.jpg" 
+              src={`./profile.jpg?t=${cacheBuster}`} 
               alt={contact.name} 
               className="h-full w-full object-cover object-top scale-100"
               onError={(e) => {
-                // 如果圖片還沒準備好，顯示預設占位圖
-                (e.target as HTMLImageElement).src = "https://api.a0.dev/assets/image?text=Professional%20Portrait%20Placeholder&aspect=9:16";
+                // 如果找不到檔案，改為生成女性理財顧問的占位圖
+                (e.target as HTMLImageElement).src = "https://api.a0.dev/assets/image?text=Professional%20Asian%20Female%20Financial%20Advisor%20Portrait&aspect=9:16";
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0c1425] via-transparent to-transparent opacity-100"></div>
